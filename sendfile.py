@@ -41,7 +41,7 @@ def mail(to, subject, text, attach):
    mailServer.close()
 
 #file = "/home/tikhonov/tools/illusion4digital/out/2013_11_how_to_start_thinking_like_a_data_scientist.pdf"
-to = "4tikhonov@gmail.com"
+to = EMAIL
 title = "PDF"
 mail(to,
    title,
