@@ -1,0 +1,8 @@
+[config]
+EMAIL_ACCOUNT = "yourmail"
+EMAIL_FOLDER = "INBOX"
+EMAIL_PASS = "yourpass"
+dir = "yourdir"
+phantomjs = /media/ext2/node_modules/.bin/phantomjs
+pdftk = /usr/bin/pdftk
+rasterize.js = /media/ext2/phantomjs/examples/rasterize.js
