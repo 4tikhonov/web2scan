@@ -15,6 +15,20 @@ import datetime
 import codecs
 from subprocess import Popen, PIPE, STDOUT
 import hashlib
+import ConfigParser
+
+def readconfig(configfile):
+        cparser = ConfigParser.RawConfigParser()
+        cparser.read(configfile)
+
+        #database = cparser.get('config', 'dbname')
+        options = {}
+        dataoptions = cparser.items( "config" )
+        for key, value in dataoptions:
+	    print key
+            options[key] = value
+
+	return options
 
 def hashfile(afile, hasher, blocksize=65536):
     buf = afile.read(blocksize)
@@ -108,9 +122,13 @@ def process_mailbox(M):
 
 
 M = imaplib.IMAP4_SSL('imap.gmail.com')
+cpath = "./config/web2scan.conf"
+options = readconfig(cpath)
+print options['email_account']
+#return
 
 try:
-    rv, data = M.login(EMAIL_ACCOUNT, EMAIL_PASS)
+    rv, data = M.login(options['email_account'], options['email_pass'])
 except imaplib.IMAP4.error:
     print "LOGIN FAILED!!! "
     sys.exit(1)
@@ -123,7 +141,7 @@ if rv == 'OK':
 else:
     print "Login failed\n"
 
-rv, data = M.select(EMAIL_FOLDER)
+rv, data = M.select(options['email_folder'])
 if rv == 'OK':
     process_mailbox(M)
     M.close()
