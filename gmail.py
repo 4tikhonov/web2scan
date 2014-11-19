@@ -1,11 +1,4 @@
 #!/usr/bin/env python
-#
-# Very basic example of using Python and IMAP to iterate over emails in a
-# gmail folder/label.  This code is released into the public domain.
-#
-# RKI July 2013
-# http://www.voidynullness.net/blog/2013/07/25/gmail-email-with-python-via-imap/
-#
 import sys
 import imaplib
 import getpass
@@ -21,7 +14,6 @@ def readconfig(configfile):
         cparser = ConfigParser.RawConfigParser()
         cparser.read(configfile)
 
-        #database = cparser.get('config', 'dbname')
         options = {}
         dataoptions = cparser.items( "config" )
         for key, value in dataoptions:
@@ -44,7 +36,7 @@ def md5sum(filename, blocksize=65536):
             hash.update(block)
     return hash.hexdigest()
 
-def process_mailbox(M):
+def process_mailbox(M, options):
     """
     Do something with emails messages in the folder.  
     For the sake of this example, print some headers.
@@ -67,7 +59,7 @@ def process_mailbox(M):
 	    except:
 	   	subject = 'Default'
 
-	    fname = dir + "/mail/inbox." + str(id)
+	    fname = options['dir'] + "/mail/inbox." + str(id)
 	    file = codecs.open(fname, "w", "utf-8")
 	    file.write(subject + "\n")
 	    file.write(frommail + "\n")
@@ -143,7 +135,7 @@ else:
 
 rv, data = M.select(options['email_folder'])
 if rv == 'OK':
-    process_mailbox(M)
+    process_mailbox(M, options)
     M.close()
 else:
     print "ERROR: Unable to open mailbox ", rv
