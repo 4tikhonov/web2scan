@@ -36,28 +36,32 @@ $file = 'default' unless ($file);
 foreach $thisurl (keys %urls)
 {
    $url = $thisurl;
-}
+   print "$url\n";
 
-if ($url=~/^(htt\w+\:\/\/\S+?)\//)
-{
-   $root = $1;
-   if ($url=~/^(htt\w+\:\/\/\S+)\//)
+   if ($url=~/^(htt\w+\:\/\/\S+?)\//)
    {
-	$fullurl = $1; 
+      $root = $1;
+      if ($url=~/^(htt\w+\:\/\/\S+)\//)
+      {
+	  $fullurl = $1; 
+	  $weburls{$fullurl}{root} = $root;
+	  $weburls{$fullurl}{fullurl} = $fullurl;
+
+	  if ($fullurl=~/$root\/(.+?)$/)
+	  {
+    	     $tmpdir = $1;
+    	     $tmpdir=~s/\W+/\_/g;
+    	     $tmpdir=~s/^\///g;
+    	     $tmpdir=~s/\/$//g;
+    	     print "DIR $tmpdir\n";
+    	     $dir = "$indir/$tmpdir";
+    	     mkdir $dir unless (-e $dir);
+	     $weburls{$fullurl}{dir} = $dir;
+	 }
+      }
    }
 }
 
-print "Full $fullurl\n";
-if ($fullurl=~/$root\/(.+?)$/)
-{
-    $tmpdir = $1;
-    $tmpdir=~s/\W+/\_/g;
-    $tmpdir=~s/^\///g;
-    $tmpdir=~s/\/$//g;
-    print "DIR $tmpdir\n";
-    $dir = "$indir/$tmpdir";
-    mkdir $dir unless (-e $dir);
-}
 
 $content = `$config{wget} -q \"$fullurl\" -O -`;  get($fullurl);
 $content=~s/\r|\n//g;
@@ -94,7 +98,7 @@ foreach $url (@urls)
 }
 
 @mainurls = ($fullurl);
-foreach $url (@mainurls)
+foreach $url (sort keys %weburls)
 {
     my $file = $url;
     if ($file=~/^.+\/(\S+)$/)
