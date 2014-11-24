@@ -6,8 +6,9 @@ BEGIN { $libpath="$Bin" };
 use lib "$libpath";
 use lib "$libpath/../lib";
 
+%config = readconfig($Bin);
 use LWP::Simple;
-$maindir = $Bin; # "/home/tikhonov/tools/illusion4digital";
+$maindir = $config{dir}; 
 $indir = "$maindir/in";
 mkdir $indir unless (-e $indir);
 $outdir = "$maindir/out";
@@ -53,13 +54,12 @@ if ($fullurl=~/$root\/(.+?)$/)
     $tmpdir=~s/\W+/\_/g;
     $tmpdir=~s/^\///g;
     $tmpdir=~s/\/$//g;
-    print "DIR $dir\n";
+    print "DIR $tmpdir\n";
     $dir = "$indir/$tmpdir";
     mkdir $dir unless (-e $dir);
 }
 
- 
-$content = get($url);
+$content = `$config{wget} -q \"$fullurl\" -O -`;  get($fullurl);
 $content=~s/\r|\n//g;
 my @urls = split(/href\=/, $content);
 foreach $url (@urls)
@@ -93,7 +93,7 @@ foreach $url (@urls)
    };
 }
 
-@mainurls = ($url);
+@mainurls = ($fullurl);
 foreach $url (@mainurls)
 {
     my $file = $url;
@@ -104,8 +104,8 @@ foreach $url (@mainurls)
 	$file=~s/\.html$//g;
 	$file=~s/\.htm$//g;
 	$file=~s/\/$//g;
-	print "$file.pdf\n";
-   	$cmd = `/media/ext2/node_modules/.bin/phantomjs /media/ext2/phantomjs/examples/rasterize.js "$url" "$outdir/$file.pdf" A4`;
+	print "Phantom: $outdir/$file.pdf\n";
+   	$cmd = `$config{phantomjs} $config{rasterizejs} "$url" "$outdir/$file.pdf" A4`;
  	push(@files, "$outdir/$file.pdf");
         print "URL $url $dir/$file.pdf\n" if ($DEBUG);
     }
@@ -116,14 +116,36 @@ foreach $file (@files)
    $outline.="$file ";
 }
 $finaldir="$outdir/$tmpdir";
+print "Outline $outline\n";
 
-$finalcmd = "/usr/bin/pdftk $outline cat output $finaldir.pdf";
+$finalcmd = "$config{pdftk} $outline cat output $finaldir.pdf";
 $run = `$finalcmd;`; # -rf $dir`;
 if (-e "$finaldir.pdf")
 {
    print "$finalcmd\n";
-   $sendmail = `$Bin/sendfile.py \"$finaldir.pdf\"`;
+   $to = $config{emailto};
+   $sendmail = `$Bin/sendfile.py \"$to\" \"$finaldir.pdf\"`;
 };
+
+sub readconfig
+{
+    my ($path, $DEBUG) = @_;
+    my %config;
+
+    open(config, "$path/config/web2scan.conf");
+    @config = <config>;
+    close(config);
+
+    foreach $str (@config)
+    {
+	# EMAIL_ACCOUNT = illusion4digital@gmail.com
+	$str=~s/\r|\n//g;
+	my ($name, $value) = split(/\s*\=\s*/, $str);
+	$config{$name} = $value;
+    }
+
+    return %config;
+}
 
 sub fromHTML
 {
