@@ -7,13 +7,19 @@ from email.MIMEText import MIMEText
 from email import Encoders
 import os
 import sys
+import ConfigParser
 
-gmail_user = "your_email@gmail.com"
-gmail_pwd = "your_password"
+def readconfig(configfile):
+        cparser = ConfigParser.RawConfigParser()
+        cparser.read(configfile)
 
-gmail_user = EMAIL_ACCOUNT
-gmail_pwd = EMAIL_PASS
-file = str(sys.argv[1])
+        options = {}
+        dataoptions = cparser.items( "config" )
+        for key, value in dataoptions:
+            print key
+            options[key] = value
+
+        return options
 
 def mail(to, subject, text, attach):
    msg = MIMEMultipart()
@@ -40,7 +46,14 @@ def mail(to, subject, text, attach):
    # Should be mailServer.quit(), but that crashes...
    mailServer.close()
 
-to = EMAIL_TO
+to = str(sys.argv[1])
+file = str(sys.argv[2])
+cpath = "./config/web2scan.conf"
+options = readconfig(cpath)
+print options['email_account']
+gmail_user = options['email_account']
+gmail_pwd = options['email_pass']
+
 title = "PDF"
 mail(to,
    title,
