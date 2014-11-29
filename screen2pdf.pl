@@ -17,7 +17,7 @@ use Getopt::Std;
  
 # declare the perl command line flags/options we want to allow
 my %options=();
-getopts("hf:H::m:u:", \%options);
+getopts("hf:H:m:u:", \%options);
  
 # test for the existence of the options on the command line.
 # in a normal program you'd do more than just print these.
@@ -44,8 +44,8 @@ foreach $thisurl (keys %urls)
       if ($url=~/^(htt\w+\:\/\/\S+)\//)
       {
 	  $fullurl = $1; 
-	  $weburls{$fullurl}{root} = $root;
-	  $weburls{$fullurl}{fullurl} = $fullurl;
+	  $weburls{$url}{root} = $root;
+	  $weburls{$url}{fullurl} = $fullurl;
 
 	  if ($fullurl=~/$root\/(.+?)$/)
 	  {
@@ -56,7 +56,7 @@ foreach $thisurl (keys %urls)
     	     print "DIR $tmpdir\n";
     	     $dir = "$indir/$tmpdir";
     	     mkdir $dir unless (-e $dir);
-	     $weburls{$fullurl}{dir} = $dir;
+	     $weburls{$url}{dir} = $dir;
 	 }
       }
    }
@@ -108,7 +108,7 @@ foreach $url (sort keys %weburls)
 	$file=~s/\.html$//g;
 	$file=~s/\.htm$//g;
 	$file=~s/\/$//g;
-	print "Phantom: $outdir/$file.pdf\n";
+	print "$url Phantom: $outdir/$file.pdf\n";
    	$cmd = `$config{phantomjs} $config{rasterizejs} "$url" "$outdir/$file.pdf" A4`;
  	push(@files, "$outdir/$file.pdf");
         print "URL $url $dir/$file.pdf\n" if ($DEBUG);
